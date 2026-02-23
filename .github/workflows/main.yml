@@ -17,7 +17,7 @@ jobs:
       # --output-file: ระบุชื่อไฟล์ปลายทาง
       # || true: เพื่อให้ Workflow ทำงานต่อแม้จะเจอ Lint Error (ถ้าต้องการให้ Fail ทันทีให้เอาออก)
       - name: Run ESLint and export HTML
-        run: npx eslint . --format html --output-file eslint-report.html || true
+        run: npx eslint server_side/ --format html --output-file eslint-report.html || true
 
       # อัปโหลดไฟล์ HTML ขึ้นไปเก็บไว้ใน Artifacts
       - name: Upload ESLint Report
