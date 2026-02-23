@@ -1,0 +1,29 @@
+name: Lint Code Base
+
+on: [push, pull_request]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      # รัน ESLint และสั่งให้ Export เป็น HTML
+      # --format html: กำหนดรูปแบบไฟล์
+      # --output-file: ระบุชื่อไฟล์ปลายทาง
+      # || true: เพื่อให้ Workflow ทำงานต่อแม้จะเจอ Lint Error (ถ้าต้องการให้ Fail ทันทีให้เอาออก)
+      - name: Run ESLint and export HTML
+        run: npx eslint . --format html --output-file eslint-report.html || true
+
+      # อัปโหลดไฟล์ HTML ขึ้นไปเก็บไว้ใน Artifacts
+      - name: Upload ESLint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report
+          path: eslint-report.html
+          retention-days: 7 # เก็บไฟล์ไว้ 7 วัน
+
