@@ -17,13 +17,24 @@ jobs:
       # --output-file: ระบุชื่อไฟล์ปลายทาง
       # || true: เพื่อให้ Workflow ทำงานต่อแม้จะเจอ Lint Error (ถ้าต้องการให้ Fail ทันทีให้เอาออก)
       - name: Run ESLint and export HTML
-        run: npx eslint server_side/ --format html --output-file eslint-report.html || true
+        # ใช้ shell bash เพื่อให้รองรับ globbing pattern
+        shell: bash
+        run: |
+          # 1. รัน eslint โดยระบุ pattern ไฟล์ให้ครอบคลุม
+          # 2. ใช้ --output-file เพื่อบังคับเขียนไฟล์
+          # 3. ใส่ || true เพื่อไม่ให้ Workflow หยุดทำงานทันทีที่เจอ Lint Error
+          npx eslint "**/*.{js,jsx,ts,tsx}" --format html --output-file eslint-report.html || true
 
-      # อัปโหลดไฟล์ HTML ขึ้นไปเก็บไว้ใน Artifacts
+      - name: Check if file exists (Debug)
+        # ขั้นตอนนี้ช่วยเช็กว่าไฟล์ถูกสร้างจริงไหม ถ้าไม่มีจะ Error ที่นี่
+        run: ls -l eslint-report.html
+
       - name: Upload ESLint Report
+        # ใช้ if: always() เพื่อให้รันเสมอแม้ Step ก่อนหน้าจะ Fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eslint-report
           path: eslint-report.html
-          retention-days: 7 # เก็บไฟล์ไว้ 7 วัน
-
+          # ถ้าหาไฟล์ไม่เจอจริงๆ ให้ Action นี้ Fail เพื่อจะได้รู้
+          if-no-files-found: error 
